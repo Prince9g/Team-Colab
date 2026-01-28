@@ -1,7 +1,18 @@
+import User from "./models/user.model.js"
+import jwt from "jsonwebtoken"
 
 const generatetoken=async(userid)=>{
-    const accesstoken=jwt.sign({userid},process.env.access_secret,{exp:"1d"});
+    const accesstoken=jwt.sign({userid},process.env.access_secret,{expiresIn:"1d"});
     return accesstoken;
+}
+const setCookies=async(res,accesstoken)=>{
+    res.cookie("accesstoken",accesstoken,{
+        httpOnly:true,// prevent xss attack 
+        secure:process.env.NODE_ENV==="production",
+        sameSite:"strict",//prevents CSRF attack request forgery attack
+        maxAge:15*60*1000
+    
+    })
 }
 const Signup=async(req,res)=>{
     try {
@@ -15,7 +26,8 @@ const Signup=async(req,res)=>{
         }
 
         const user=await User.create({name,email,password,role,status});
-        const accesstoken=user.generatetoken(user._id);
+        const accesstoken=await generatetoken(user._id);
+        setCookies(res,accesstoken);
         return res.status(201).json({
             message:"User created successfully",
             user:{
@@ -46,11 +58,12 @@ const Login=async(req,res)=>{
         return res.status(400).json({message:"Signup first"});
     }
      
-    const passwordcheck=user.ispassword(password);
+    const passwordcheck=await user.isconfirmpass(password);
     if(!passwordcheck){
         return res.status(400).json({message:"Password incorrect"});
     }
-    // token
+     const accesstoken=await generatetoken(user._id);
+     setCookies(res,accesstoken);
     return res.status(200).json({
         message:"Login successfully",
         })
@@ -58,3 +71,5 @@ const Login=async(req,res)=>{
         return res.status(500).json({message:error.message})
     }
 }
+
+export {Signup,Login}

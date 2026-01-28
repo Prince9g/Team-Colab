@@ -6,6 +6,18 @@ import LeadDashboard from "./pages/LeadDashboard";
 import MemberDashboard from "./pages/MemberDashboard";
 import Tasks from "./pages/Tasks";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import { useAuth } from "./store/AuthContext";
+
+const RootRedirect = () => {
+  const { user } = useAuth();
+
+  return (
+    <Navigate
+      to={user?.role === "lead" ? "/dashboard" : "/member"}
+      replace
+    />
+  );
+};
 
 function App() {
   return (
@@ -22,9 +34,12 @@ function App() {
             </ProtectedRoute>
           }
         >
+          {/* ✅ / root handler */}
+          <Route index element={<RootRedirect />} />
+
           {/* Lead only */}
           <Route
-            path="/dashboard"
+            path="dashboard"
             element={
               <ProtectedRoute allowedRoles={["lead"]}>
                 <LeadDashboard />
@@ -34,7 +49,7 @@ function App() {
 
           {/* Member only */}
           <Route
-            path="/member"
+            path="member"
             element={
               <ProtectedRoute allowedRoles={["member"]}>
                 <MemberDashboard />
@@ -44,7 +59,7 @@ function App() {
 
           {/* Shared */}
           <Route
-            path="/tasks"
+            path="tasks"
             element={
               <ProtectedRoute allowedRoles={["lead", "member"]}>
                 <Tasks />

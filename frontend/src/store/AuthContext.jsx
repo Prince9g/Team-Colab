@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
     const fetchCurrentUser = async () => {
       try {
         const res = await api.get("/user/profile");
-        console.log("Fetched user profile:", res.data);
         setUser(res.data); // backend sends user directly
       } catch (error) {
         setUser(null);
@@ -27,14 +26,16 @@ export const AuthProvider = ({ children }) => {
   // 🔐 Login
   const login = async (email, password) => {
     try {
+      // 1️⃣ Login (sets cookie)
       await api.post("/user/login", { email, password });
 
-      // after login, fetch profile
+      // 2️⃣ Fetch user profile using cookie
       const res = await api.get("/user/profile");
       setUser(res.data);
 
       return { success: true };
     } catch (error) {
+      setUser(null);
       return {
         success: false,
         message:
@@ -45,11 +46,7 @@ export const AuthProvider = ({ children }) => {
 
   // 🚪 Logout (client-side only)
   const logout = async () => {
-    // no backend logout route exists
     setUser(null);
-
-    // optional: hard refresh to clear state
-    // window.location.reload();
   };
 
   const value = {

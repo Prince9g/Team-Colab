@@ -2,39 +2,46 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/AuthContext";
 
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { login, user, isAuthenticated } = useAuth();
+  const { login, user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  // 🔄 Redirect if already logged in
+  // 🔄 Redirect once auth state is ready
   useEffect(() => {
-    if (isAuthenticated && user) {
-      navigate(user.role === "lead" ? "/lead" : "/member", {
-        replace: true,
-      });
+    if (!loading && isAuthenticated && user) {
+      navigate(
+        user.role === "lead" ? "/lead" : "/member",
+        { replace: true }
+      );
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [loading, isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (submitting) return;
+
     setError("");
     setSubmitting(true);
 
-    const result = await login(email, password);
+    try {
+      const result = await login(email, password);
 
-    if (!result.success) {
-      setError(result.message);
+      if (!result.success) {
+        setError(result.message);
+      }
+      // redirect handled by useEffect
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      // 🔴 THIS IS CRITICAL (prevents infinite loading)
       setSubmitting(false);
-      return;
     }
-
-    // redirect happens via useEffect
   };
 
   return (
@@ -58,6 +65,7 @@ const Login = () => {
               className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={submitting}
               required
             />
           </div>
@@ -69,13 +77,14 @@ const Login = () => {
               className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={submitting}
               required
             />
           </div>
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !email || !password}
             className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 disabled:opacity-60"
           >
             {submitting ? "Logging in..." : "Login"}

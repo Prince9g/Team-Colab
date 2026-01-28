@@ -1,5 +1,6 @@
 import User from "./models/user.model.js"
 import jwt from "jsonwebtoken"
+import Task from "../models/task.model.js";
 
 const generatetoken=async(userid)=>{
     const accesstoken=jwt.sign({userid},process.env.access_secret,{expiresIn:"1d"});
@@ -72,4 +73,23 @@ const Login=async(req,res)=>{
     }
 }
 
-export {Signup,Login}
+const getTask = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const task = await Task.find({ assignedTo: id });
+        res.status(200).json({ task });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const profile=async(req,res)=>{
+  const user=req.user
+  try {
+    res.json(user)
+  } catch (error) {
+    res.status(500).json({message:error.message})
+  }
+}
+
+export {Signup,Login, getTask, profile};

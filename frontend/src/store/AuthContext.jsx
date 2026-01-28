@@ -7,12 +7,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check login status on app load
+  // 🔁 Check login status on app load
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const res = await api.get("/auth/me");
-        setUser(res.data.user);
+        const res = await api.get("/user/profile");
+        console.log("Fetched user profile:", res.data);
+        setUser(res.data); // backend sends user directly
       } catch (error) {
         setUser(null);
       } finally {
@@ -26,27 +27,29 @@ export const AuthProvider = ({ children }) => {
   // 🔐 Login
   const login = async (email, password) => {
     try {
-      const res = await api.post("/auth/login", { email, password });
-      setUser(res.data.user);
+      await api.post("/user/login", { email, password });
+
+      // after login, fetch profile
+      const res = await api.get("/user/profile");
+      setUser(res.data);
+
       return { success: true };
     } catch (error) {
       return {
         success: false,
         message:
-          error.response?.data?.message || "Invalid credentials",
+          error.response?.data?.message || "Login failed",
       };
     }
   };
 
-  // 🚪 Logout
+  // 🚪 Logout (client-side only)
   const logout = async () => {
-    try {
-      await api.post("/auth/logout");
-    } catch (error) {
-      // ignore
-    } finally {
-      setUser(null);
-    }
+    // no backend logout route exists
+    setUser(null);
+
+    // optional: hard refresh to clear state
+    // window.location.reload();
   };
 
   const value = {

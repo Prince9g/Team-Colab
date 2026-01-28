@@ -10,7 +10,7 @@ const setCookies=async(res,accesstoken)=>{
         httpOnly:true,// prevent xss attack 
         secure:process.env.NODE_ENV==="production",
         sameSite:"strict",//prevents CSRF attack request forgery attack
-        maxAge:15*60*1000
+        maxAge:24*60*60*1000
     
     })
 }
@@ -72,4 +72,12 @@ const Login=async(req,res)=>{
     }
 }
 
-export {Signup,Login}
+const profile=async(req,res)=>{
+  const user=req.user
+  try {
+    res.json(user)
+  } catch (error) {
+    res.status(500).json({message:error.message})
+  }
+}
+export {Signup,Login,profile}

@@ -1,7 +1,8 @@
-import User from "./models/user.model.js"
+import User from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import Task from "../models/task.model.js";
-
+import dotenv from "dotenv"
+dotenv.config()
 const generatetoken=async(userid)=>{
     const accesstoken=jwt.sign({userid},process.env.access_secret,{expiresIn:"1d"});
     return accesstoken;

@@ -46,40 +46,43 @@ const Signup=async(req,res)=>{
     }
         
 }
+const Login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-const Login=async(req,res)=>{
-    try {
-        const {email,password}=req.body;
-
-        if(!email||!password){
-            return res.status(400).json("Enter all fields");
-        }
-        const user=await User.findOne({email});
-
-    if(!user){
-        return res.status(400).json({message:"Signup first"});
+    if (!email || !password) {
+      return res.status(400).json("Enter all fields");
     }
-     
-    const passwordcheck=await user.isconfirmpass(password);
-    if(!passwordcheck){
-        return res.status(400).json({message:"Password incorrect"});
+
+    // ⚠️ MUST select password explicitly
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res.status(400).json({ message: "Signup first" });
     }
-     const accesstoken=await generatetoken(user._id);
-     setCookies(res,accesstoken);
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Password incorrect" });
+    }
+
+    const accesstoken = await generatetoken(user._id);
+    setCookies(res, accesstoken);
+
     return res.status(200).json({
-        message:"User created successfully",
-            user:{
-                _id:user._id,
-                name:user.name,
-                email:user.email,
-                role:user.role,
-                status:user.status
-            }
-        })
-    } catch (error) {
-        return res.status(500).json({message:error.message})
-    }
-}
+      message: "Login successful",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 const getTask = async (req, res) => {
     const id = req.params.id;
@@ -90,6 +93,20 @@ const getTask = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+  
+
+const getAllTasks=async(req,res)=>{
+    try {
+        const tasks=await Task.find(); 
+        res.status(200).json({tasks});
+    }
+    catch (error) {
+        res.status(500).json({message:error.message})
+
+    }
+};
+
+
 
 const profile=async(req,res)=>{
   const user=req.user
@@ -100,4 +117,37 @@ const profile=async(req,res)=>{
   }
 }
 
-export {Signup,Login, getTask, profile};
+const getalluser=async(req,res)=>{
+    try {
+        const users=await User.find();      
+        res.status(200).json({users});
+    }
+
+    catch (error) {
+        res.status(500).json({message:error.message})   
+
+    }
+}   
+
+const logout = async (req, res) => {
+  try {
+    res.clearCookie("accesstoken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Logout failed",
+    });
+  }
+};
+
+
+export {Signup,Login, getTask, profile ,getAllTasks ,getalluser, logout};

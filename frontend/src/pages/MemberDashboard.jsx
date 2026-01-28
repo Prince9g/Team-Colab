@@ -1,22 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StatsCard from "../components/dashboard/StatsCard";
+import { useAuth } from "../store/AuthContext";
+import { getUserTasks } from "../services/taskApi";
+import Loader from "../components/common/Loader";
 
 const MemberDashboard = () => {
-  // 🔹 Mock availability state (API / socket later)
+  const { user } = useAuth();
+
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
 
-  // 🔹 Mock task stats
-  const stats = [
-    { title: "My Tasks", value: 7 },
-    { title: "Completed", value: 3 },
-    { title: "Pending", value: 4 },
-  ];
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const data = await getUserTasks(user._id);
+        setTasks(data);
+      } catch (error) {
+        console.error("Failed to fetch tasks", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const totalTasks = 7;
-  const completedTasks = 3;
-  const progressPercent = Math.round(
-    (completedTasks / totalTasks) * 100
-  );
+    if (user?._id) {
+      fetchTasks();
+    }
+  }, [user?._id]);
+
+  if (loading) return <Loader />;
+
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter(
+    (t) => t.status === "Done"
+  ).length;
+  const pendingTasks = totalTasks - completedTasks;
+
+  const progressPercent =
+    totalTasks === 0
+      ? 0
+      : Math.round((completedTasks / totalTasks) * 100);
 
   return (
     <div className="space-y-6">
@@ -29,7 +52,7 @@ const MemberDashboard = () => {
         {/* Online / Offline Toggle */}
         <button
           onClick={() => setIsOnline((prev) => !prev)}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition ${
+          className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium ${
             isOnline
               ? "bg-green-100 text-green-700"
               : "bg-gray-200 text-gray-600"
@@ -46,29 +69,25 @@ const MemberDashboard = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stats.map((item) => (
-          <StatsCard
-            key={item.title}
-            title={item.title}
-            value={item.value}
-          />
-        ))}
+        <StatsCard title="My Tasks" value={totalTasks} />
+        <StatsCard title="Completed" value={completedTasks} />
+        <StatsCard title="Pending" value={pendingTasks} />
       </div>
 
-      {/* Progress Section */}
+      {/* Progress */}
       <div className="bg-white rounded-xl shadow-sm p-5 max-w-md">
         <h3 className="text-sm font-medium text-gray-600 mb-3">
           Task Progress
         </h3>
 
-        <div className="flex items-center justify-between text-sm mb-1">
+        <div className="flex justify-between text-sm mb-1">
           <span>Completed</span>
           <span>{progressPercent}%</span>
         </div>
 
         <div className="h-2 bg-gray-200 rounded">
           <div
-            className="h-2 bg-blue-500 rounded transition-all"
+            className="h-2 bg-blue-500 rounded"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -78,4 +97,3 @@ const MemberDashboard = () => {
 };
 
 export default MemberDashboard;
-

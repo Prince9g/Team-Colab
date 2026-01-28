@@ -15,9 +15,10 @@ const Login = () => {
   useEffect(() => {
     if (!loading && isAuthenticated && user) {
       navigate(
-        user.role === "lead" ? "/lead" : "/member",
-        { replace: true }
-      );
+  user.role === "admin" ? "/dashboard" : "/member",
+  { replace: true }
+);
+
     }
   }, [loading, isAuthenticated, user, navigate]);
 
@@ -35,11 +36,10 @@ const Login = () => {
       if (!result.success) {
         setError(result.message);
       }
-      // redirect handled by useEffect
+      // ✅ Redirect handled by useEffect
     } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {
-      // 🔴 THIS IS CRITICAL (prevents infinite loading)
       setSubmitting(false);
     }
   };

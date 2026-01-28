@@ -1,7 +1,7 @@
 const nextStatusMap = {
-  todo: { label: "Start", value: "inProgress" },
-  inProgress: { label: "Complete", value: "done" },
-  done: null,
+  Todo: { label: "Start", value: "InProgress" },
+  InProgress: { label: "Complete", value: "Done" },
+  Done: null,
 };
 
 const StatusButton = ({ currentStatus, onChange }) => {
@@ -20,3 +20,4 @@ const StatusButton = ({ currentStatus, onChange }) => {
 };
 
 export default StatusButton;
+

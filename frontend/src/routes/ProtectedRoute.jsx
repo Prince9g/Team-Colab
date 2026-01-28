@@ -11,15 +11,14 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
   }
 
   // 🔐 Not logged in
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
   // 🚫 Role not allowed
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // redirect to respective dashboard
     const redirectPath =
-      user.role === "lead" ? "/lead" : "/member";
+      user.role === "admin" ? "/dashboard" : "/member";
 
     return <Navigate to={redirectPath} replace />;
   }
@@ -29,3 +28,4 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
 };
 
 export default ProtectedRoute;
+

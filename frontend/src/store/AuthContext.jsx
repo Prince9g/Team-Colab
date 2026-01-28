@@ -44,10 +44,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🚪 Logout (client-side only)
+  // 🚪 Logout 
   const logout = async () => {
-    setUser(null);
-  };
+  try {
+    await api.post("/user/logout"); // clears cookie on server
+  } catch (error) {
+    console.error("Logout API failed", error);
+  } finally {
+    setUser(null); // always clear client state
+  }
+};
+
 
   const value = {
     user,

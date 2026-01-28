@@ -4,7 +4,7 @@ import {connectDB} from "./db/db.js"
 import userRoutes from "./routes/user.routes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
-// import taskRoutes from "../routes/task.routes.js"
+import taskRoutes from "./routes/task.routes.js"
 
 
 dotenv.config()
@@ -25,7 +25,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use('/api/user',userRoutes)
-//app.use('/api/task',taskRoutes)
+app.use('/api/task',taskRoutes)
 const PORT=5000;
 
 

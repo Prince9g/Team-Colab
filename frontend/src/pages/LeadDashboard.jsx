@@ -1,13 +1,53 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StatsCard from "../components/dashboard/StatsCard";
 import StatusChart from "../components/dashboard/StatusChart";
 import TeamStatus from "../components/dashboard/TeamStatus";
 import AddTaskModal from "../components/task/AddTaskModal";
+import Loader from "../components/common/Loader";
+
+import { getAllTasks, createTask } from "../services/taskApi";
+import { getAllUsers } from "../services/userApi";
 
 const LeadDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [tasks, setTasks] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // 🔹 Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [tasksData, usersData] = await Promise.all([
+          getAllTasks(),   // admin → all tasks
+          getAllUsers(),   // all users
+        ]);
+
+        setTasks(tasksData);
+        setMembers(usersData);
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // 🔹 Create task via backend
+  const handleAddTask = async (payload) => {
+    try {
+      const newTask = await createTask(payload);
+      setTasks((prev) => [...prev, newTask]);
+    } catch (error) {
+      console.error("Task creation failed", error);
+    }
+  };
+
+  if (loading) return <Loader />;
+
+  // 🔹 Stats (derived from backend tasks)
   const stats = [
     { title: "Total Tasks", value: tasks.length },
     {
@@ -18,34 +58,27 @@ const LeadDashboard = () => {
       title: "Pending Tasks",
       value: tasks.filter((t) => t.status !== "done").length,
     },
-    { title: "Team Members", value: 5 },
+    {
+      title: "Team Members",
+      value: members.filter((u) => u.role === "user").length,
+    },
   ];
 
-  const statusData = {
-    todo: tasks.filter((t) => t.status === "todo").length,
-    inProgress: tasks.filter((t) => t.status === "inProgress").length,
-    done: tasks.filter((t) => t.status === "done").length,
-  };
 
-  const teamMembers = [
-    { id: 1, name: "Amit", online: true },
-    { id: 2, name: "Priya", online: false },
-    { id: 3, name: "Rohit", online: true },
-    { id: 4, name: "Neha", online: true },
-    { id: 5, name: "Karan", online: false },
-  ];
-
-  const handleAddTask = (task) => {
-    setTasks((prev) => [...prev, task]);
-  };
+  // 🔹 Team list (only normal users)
+  const teamMembers = members
+    .filter((u) => u.role === "user")
+    .map((u) => ({
+      _id: u._id,
+      name: u.name,
+      online: u.status === "active", // temporary mapping
+    }));
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
-          Lead Dashboard
-        </h2>
+        <h2 className="text-xl font-semibold">Lead Dashboard</h2>
 
         <button
           onClick={() => setShowModal(true)}
@@ -69,13 +102,13 @@ const LeadDashboard = () => {
       {/* Analytics + Team */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <StatusChart data={statusData} />
+          <StatusChart />
         </div>
 
         <TeamStatus members={teamMembers} />
       </div>
 
-      {/* Modal */}
+      {/* Add Task Modal */}
       <AddTaskModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}

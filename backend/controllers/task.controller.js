@@ -13,9 +13,9 @@ export const createTask = async (req, res) => {
   try {
     const task = await Task.create({
       title,
-      description,   // optional
+      description,   
       assignedTo,
-      priority,      // optional (default applies)
+      priority,      
       deadline,
     });
 

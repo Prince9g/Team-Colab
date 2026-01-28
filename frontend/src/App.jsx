@@ -8,12 +8,15 @@ import Tasks from "./pages/Tasks";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { useAuth } from "./store/AuthContext";
 
+// 🔁 Handles "/" route intelligently
 const RootRedirect = () => {
   const { user } = useAuth();
 
+  if (!user) return <Navigate to="/login" replace />;
+
   return (
     <Navigate
-      to={user?.role === "lead" ? "/dashboard" : "/member"}
+      to={user.role === "admin" ? "/dashboard" : "/member"}
       replace
     />
   );
@@ -23,35 +26,35 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 🔓 Public Route */}
+        {/* 🔓 Public */}
         <Route path="/login" element={<Login />} />
 
         {/* 🔐 Protected Layout */}
         <Route
           element={
-            <ProtectedRoute allowedRoles={["lead", "member"]}>
+            <ProtectedRoute allowedRoles={["admin", "user"]}>
               <Layout />
             </ProtectedRoute>
           }
         >
-          {/* ✅ / root handler */}
+          {/* Root */}
           <Route index element={<RootRedirect />} />
 
-          {/* Lead only */}
+          {/* Admin (Lead) */}
           <Route
             path="dashboard"
             element={
-              <ProtectedRoute allowedRoles={["lead"]}>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <LeadDashboard />
               </ProtectedRoute>
             }
           />
 
-          {/* Member only */}
+          {/* User (Member) */}
           <Route
             path="member"
             element={
-              <ProtectedRoute allowedRoles={["member"]}>
+              <ProtectedRoute allowedRoles={["user"]}>
                 <MemberDashboard />
               </ProtectedRoute>
             }
@@ -61,14 +64,14 @@ function App() {
           <Route
             path="tasks"
             element={
-              <ProtectedRoute allowedRoles={["lead", "member"]}>
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
                 <Tasks />
               </ProtectedRoute>
             }
           />
         </Route>
 
-        {/* 🧭 Fallback */}
+        {/* 🧭 Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

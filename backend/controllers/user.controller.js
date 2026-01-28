@@ -11,7 +11,7 @@ const setCookies=async(res,accesstoken)=>{
         httpOnly:true,// prevent xss attack 
         secure:process.env.NODE_ENV==="production",
         sameSite:"strict",//prevents CSRF attack request forgery attack
-        maxAge:15*60*1000
+        maxAge:24*60*60*1000
     
     })
 }

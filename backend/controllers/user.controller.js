@@ -67,7 +67,14 @@ const Login=async(req,res)=>{
      const accesstoken=await generatetoken(user._id);
      setCookies(res,accesstoken);
     return res.status(200).json({
-        message:"Login successfully",
+        message:"User created successfully",
+            user:{
+                _id:user._id,
+                name:user.name,
+                email:user.email,
+                role:user.role,
+                status:user.status
+            }
         })
     } catch (error) {
         return res.status(500).json({message:error.message})

@@ -5,6 +5,7 @@ import User from '../models/user.model.js';
 
 export const auth=async(req,res,next)=>{
         const token=req.cookies.accesstoken;
+        //console.log("Token in auth middleware:", token);
         if(!token){
           return res.status(401).json({message:"Unauthorized"})
         }

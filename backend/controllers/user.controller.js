@@ -105,16 +105,17 @@ const changeStatus = async(req,res) => {
   }
 }
 
-const getAllTasks=async(req,res)=>{
-    try {
-        const tasks=await Task.find(); 
-        res.status(200).json({tasks});
-    }
-    catch (error) {
-        res.status(500).json({message:error.message})
+const getAllTasks = async (req, res) => {
+  try {
+    const tasks = await Task.find()
+      .populate("assignedTo", "name email role");
 
-    }
+    res.status(200).json({ tasks });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
+
 
 
 

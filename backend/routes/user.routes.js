@@ -11,6 +11,6 @@ router.get('/getUserTask/:id', getTask);
 router.get('/allTasks',adminauth, getAllTasks);
 router.get('/getalluser',adminauth,getalluser);
 router.post('/logout',auth,logout);
-router.patch('/changestatus',auth, changeStatus);
+router.patch('/changestatus/:id',auth, changeStatus);
 
 export default router;

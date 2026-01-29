@@ -3,6 +3,7 @@ import StatsCard from "../components/dashboard/StatsCard";
 import { useAuth } from "../store/AuthContext";
 import { getUserTasks } from "../services/taskApi";
 import Loader from "../components/common/Loader";
+import api from "../services/api";
 
 const MemberDashboard = () => {
   const { user } = useAuth();
@@ -14,7 +15,7 @@ const MemberDashboard = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const data = await getUserTasks(user._id);
+        const data = await api.get(`/user/getUserTask/${user._id}`).then(res=>res.data.task);
         setTasks(data);
       } catch (error) {
         console.error("Failed to fetch tasks", error);
@@ -22,10 +23,8 @@ const MemberDashboard = () => {
         setLoading(false);
       }
     };
+     fetchTasks();
 
-    if (user?._id) {
-      fetchTasks();
-    }
   }, [user?._id]);
 
   if (loading) return <Loader />;

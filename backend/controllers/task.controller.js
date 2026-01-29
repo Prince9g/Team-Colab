@@ -31,7 +31,7 @@ export const createTask = async (req, res) => {
 
 export const updateTask=async(req,res)=>{
     const {id} = req.params;
-    const status = req.body.status;
+    const status = req.params.status;
     try{
         const task = await Task.findByIdAndUpdate(id, {status}, {new: true});
         res.status(200).json({message: "Task Updated", task});

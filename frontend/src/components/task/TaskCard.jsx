@@ -71,6 +71,7 @@ const TaskCard = ({ task, onStatusChange, isAdmin }) => {
       {!isAdmin && onStatusChange && (
         <div className="pt-2">
           <StatusButton
+             taskId={task._id}
             currentStatus={status}
             onChange={(newStatus) =>
               onStatusChange(task._id, newStatus)

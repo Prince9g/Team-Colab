@@ -19,26 +19,17 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-  process.env.CLIENT_URL, // https://taskmanager03.netlify.app
+  "https://taskmanager03.netlify.app",
 ];
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // allow Postman / curl
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Not allowed by CORS"));
-    },
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// app.options("*", cors());
 
 /* =======================
    MIDDLEWARE

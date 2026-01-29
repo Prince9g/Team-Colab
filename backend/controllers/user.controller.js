@@ -7,15 +7,14 @@ const generatetoken=async(userid)=>{
     const accesstoken=jwt.sign({userid},process.env.access_secret,{expiresIn:"1d"});
     return accesstoken;
 }
-const setCookies=async(res,accesstoken)=>{
-    res.cookie("accesstoken",accesstoken,{
-        httpOnly:true,// prevent xss attack 
-        secure:process.env.NODE_ENV==="production",
-        sameSite:"strict",//prevents CSRF attack request forgery attack
-        maxAge:24*60*60*1000
-    
-    })
-}
+const setCookies = (res, accesstoken) => {
+  res.cookie("accesstoken", accesstoken, {
+    httpOnly: true,
+    secure: true,          // REQUIRED in production
+    sameSite: "none",      // REQUIRED for cross-site
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+};
 const Signup=async(req,res)=>{
     try {
         const {name,email,password,status,role}=req.body;

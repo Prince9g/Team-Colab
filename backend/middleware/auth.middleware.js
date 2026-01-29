@@ -9,7 +9,7 @@ export const auth=async(req,res,next)=>{
         if(!token){
           return res.status(401).json({message:"Unauthorized"})
         }
-    try {
+        try {
       const decoded=jwt.verify(token,process.env.access_secret);
       const user=await User.findById(decoded.userid).select("-password");
       req.user=user;

@@ -1,31 +1,62 @@
 import { useEffect, useState } from "react";
 import StatsCard from "../components/dashboard/StatsCard";
 import { useAuth } from "../store/AuthContext";
-import { getUserTasks } from "../services/taskApi";
 import Loader from "../components/common/Loader";
 import api from "../services/api";
 
 const MemberDashboard = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(true);
+
+  // ✅ derive initial state from DB
+  const [isOnline, setIsOnline] = useState(
+    user?.status === "active"
+  );
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const data = await api.get(`/user/getUserTask/${user._id}`).then(res=>res.data.task);
-        setTasks(data);
+        const res = await api.get(
+          `/user/getUserTask/${user._id}`
+        );
+        setTasks(res.data.task);
       } catch (error) {
         console.error("Failed to fetch tasks", error);
       } finally {
         setLoading(false);
       }
     };
-     fetchTasks();
 
+    if (user?._id) fetchTasks();
   }, [user?._id]);
+
+  // ✅ backend-driven toggle
+  const toggleStatus = async () => {
+    const newStatus = isOnline ? "inactive" : "active";
+
+    try {
+      setUpdatingStatus(true);
+
+      await api.patch(`/user/changestatus/${user._id}`, {
+        status: newStatus,
+      });
+
+      setIsOnline(newStatus === "active");
+
+      // keep auth context in sync
+      setUser((prev) => ({
+        ...prev,
+        status: newStatus,
+      }));
+    } catch (error) {
+      console.error("Failed to update status", error);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   if (loading) return <Loader />;
 
@@ -50,11 +81,16 @@ const MemberDashboard = () => {
 
         {/* Online / Offline Toggle */}
         <button
-          onClick={() => setIsOnline((prev) => !prev)}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium ${
+          onClick={toggleStatus}
+          disabled={updatingStatus}
+          className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition ${
             isOnline
               ? "bg-green-100 text-green-700"
               : "bg-gray-200 text-gray-600"
+          } ${
+            updatingStatus
+              ? "opacity-50 cursor-not-allowed"
+              : ""
           }`}
         >
           <span

@@ -11,5 +11,4 @@ router.get('/getUserTask/:id', getTask);
 router.get('/allTasks',adminauth, getAllTasks);
 router.get('/getalluser',adminauth,getalluser);
 router.post('/logout',auth,logout);
-
 export default router;

@@ -5,7 +5,8 @@ import Loader from "../components/common/Loader";
 import api from "../services/api";
 
 const MemberDashboard = () => {
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
+
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,28 +36,23 @@ const MemberDashboard = () => {
 
   // ✅ backend-driven toggle
   const toggleStatus = async () => {
-    const newStatus = isOnline ? "inactive" : "active";
+  const newStatus = isOnline ? "inactive" : "active";
 
-    try {
-      setUpdatingStatus(true);
+  try {
+    setUpdatingStatus(true);
 
-      await api.patch(`/user/changestatus/${user._id}`, {
-        status: newStatus,
-      });
+    await api.patch(`/user/changestatus/${user._id}`, {
+      status: newStatus,
+    });
 
-      setIsOnline(newStatus === "active");
+    setIsOnline(newStatus === "active");
+  } catch (error) {
+    console.error("Failed to update status", error);
+  } finally {
+    setUpdatingStatus(false);
+  }
+};
 
-      // keep auth context in sync
-      setUser((prev) => ({
-        ...prev,
-        status: newStatus,
-      }));
-    } catch (error) {
-      console.error("Failed to update status", error);
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };
 
   if (loading) return <Loader />;
 

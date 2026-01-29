@@ -71,7 +71,7 @@ const LeadDashboard = () => {
     .map((u) => ({
       _id: u._id,
       name: u.name,
-      online: u.status === "active", // temporary mapping
+      status: u.status // temporary mapping
     }));
 
   return (

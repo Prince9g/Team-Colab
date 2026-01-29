@@ -94,6 +94,16 @@ const getTask = async (req, res) => {
     }
 }
   
+const changeStatus = async(req,res) => {
+  const id = req.params.id;
+  const {status} = req.body;
+  try {
+    const user = await User.findByIdAndUpdate(id, {status}, {new: true});
+    res.status(200).json({message: "Task Updated", user});
+  } catch (error) {
+    res.status(500).json({message: error.message});
+  }
+}
 
 const getAllTasks=async(req,res)=>{
     try {
@@ -150,4 +160,4 @@ const logout = async (req, res) => {
 };
 
 
-export {Signup,Login, getTask, profile ,getAllTasks ,getalluser, logout};
+export {Signup,Login, getTask, profile ,getAllTasks ,getalluser, logout, changeStatus};

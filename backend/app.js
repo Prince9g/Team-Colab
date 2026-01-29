@@ -12,26 +12,52 @@ connectDB();
 
 const app = express();
 
+/* =======================
+   CORS CONFIG (FINAL)
+======================= */
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  process.env.CLIENT_URL, // https://taskmanager03.netlify.app
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      process.env.CLIENT_URL,
-    ],
+    origin: (origin, callback) => {
+      // allow Postman / curl
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-
+/* =======================
+   MIDDLEWARE
+======================= */
 
 app.use(express.json());
 app.use(cookieParser());
 
+/* =======================
+   ROUTES
+======================= */
+
 app.use("/api/user", userRoutes);
 app.use("/api/task", taskRoutes);
 
-// health check
+/* =======================
+   HEALTH CHECK
+======================= */
+
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });

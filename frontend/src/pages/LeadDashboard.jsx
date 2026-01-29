@@ -52,11 +52,11 @@ const LeadDashboard = () => {
     { title: "Total Tasks", value: tasks.length },
     {
       title: "Completed Tasks",
-      value: tasks.filter((t) => t.status === "done").length,
+      value: tasks.filter((t) => t.status === "Done").length,
     },
     {
       title: "Pending Tasks",
-      value: tasks.filter((t) => t.status !== "done").length,
+      value: tasks.filter((t) => t.status === "InProgress" || t.status === "Todo").length,
     },
     {
       title: "Team Members",

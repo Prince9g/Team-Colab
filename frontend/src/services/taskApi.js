@@ -9,7 +9,7 @@ export const getUserTasks = async (userId) => {
 // 🔹 Get all tasks (admin)
 export const getAllTasks = async () => {
   const res = await api.get("/user/allTasks");
-  console.log("Fetched tasks:", res.data.tasks);
+  // console.log("Fetched tasks:", res.data.tasks);
   return res.data.tasks; // backend sends { tasks }
 };
 
